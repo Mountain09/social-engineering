@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attack Simulation Training - Microsoft Defender</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #1b1b1b;
+    --bg-secondary: #252526;
+    --bg-tertiary: #2d2d2d;
+    --bg-input: #1e1e1e;
+    --bg-hover: #2a2d2e;
+    --bg-selected: #094771;
+    --border: #3d3d3d;
+    --border-light: #4d4d4d;
+    --text-primary: #cccccc;
+    --text-secondary: #9d9d9d;
+    --text-white: #ffffff;
+    --text-muted: #6e6e6e;
+    --accent-blue: #0078d4;
+    --accent-blue-light: #1a8cff;
+    --accent-blue-hover: #006cbd;
+    --accent-cyan: #4fc3f7;
+    --link: #4da6ff;
+    --link-hover: #6db8ff;
+    --success: #107c10;
+    --success-light: #13a10e;
+    --warning: #ca5010;
+    --danger: #c50f1f;
+    --stepper-done: #0078d4;
+    --stepper-active: #0078d4;
+    --stepper-inactive: #555;
+    --scrollbar-thumb: #555;
+    --scrollbar-track: #2d2d2d;
+    --tab-active-border: #0078d4;
+    --checkbox-bg: #252526;
+    --table-header: #2d2d2d;
+    --table-row-hover: #2a2d2e;
+    --table-border: #3d3d3d;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #777; }
+
+  /* Layout */
+  .app-header {
+    height: 32px;
+    background: #171717;
+    border-bottom: 1px solid #000;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .breadcrumb span { color: var(--text-secondary); }
+  .breadcrumb .sep { color: var(--text-muted); }
+
+  .app-body {
+    display: flex;
+    height: calc(100vh - 32px);
+    overflow: hidden;
+  }
+
+  /* Sidebar / Stepper */
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    padding: 28px 0 28px 0;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .stepper {
+    list-style: none;
+    padding: 0 0 0 28px;
+    position: relative;
+  }
+
+  .stepper-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    position: relative;
+    min-height: 52px;
+  }
+
+  .stepper-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 9px;
+    top: 22px;
+    width: 2px;
+    height: calc(100% - 4px);
+    background: var(--stepper-inactive);
+  }
+
+  .stepper-item.done:not(:last-child)::after,
+  .stepper-item.active:not(:last-child)::after {
+    background: var(--stepper-done);
+  }
+
+  .step-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--stepper-inactive);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 10px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .stepper-item.done .step-indicator {
+    border-color: var(--stepper-done);
+    background: var(--stepper-done);
+  }
+
+  .stepper-item.active .step-indicator {
+    border-color: var(--stepper-active);
+    background: var(--stepper-active);
+    box-shadow: 0 0 0 3px rgba(0,120,212,0.3);
+  }
+
+  .stepper-item.done .step-indicator::after {
+    content: '✓';
+    color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+  }
+
+  .stepper-item.active .step-indicator::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #fff;
+    border-radius: 50%;
+  }
+
+  .step-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    padding-top: 2px;
+    cursor: default;
+  }
+
+  .stepper-item.done .step-label { color: var(--text-secondary); }
+  .stepper-item.active .step-label { color: var(--text-white); font-weight: 600; }
+
+  /* Main content */
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg-primary);
+  }
+
+  .content-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 48px 32px 48px;
+  }
+
+  .page-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-white);
+    margin-bottom: 10px;
+  }
+
+  .page-description {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+
+  /* Footer / Navigation */
+  .wizard-footer {
+    border-top: 1px solid var(--border);
+    padding: 12px 48px;
+    display: flex;
+    align-items: center;
+    background: var(--bg-secondary);
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .footer-right {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 6px 16px;
+    font-size: 13px;
+    font-family: inherit;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s, border-color 0.15s;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background: var(--accent-blue);
+    color: #fff;
+    border-color: var(--accent-blue);
+  }
+  .btn-primary:hover { background: var(--accent-blue-hover); border-color: var(--accent-blue-hover); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-primary);
+    border-color: var(--border-light);
+  }
+  .btn-secondary:hover { background: var(--bg-hover); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--link);
+    border-color: transparent;
+    padding: 6px 8px;
+  }
+  .btn-ghost:hover { background: var(--bg-hover); }
+
+  .btn-outline-blue {
+    background: transparent;
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+  }
+  .btn-outline-blue:hover { background: rgba(0,120,212,0.1); }
+
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Radio */
+  .radio-group { display: flex; flex-direction: column; gap: 0; }
+
+  .radio-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .radio-option:hover { background: var(--bg-hover); }
+  .radio-option.selected { border-color: var(--accent-blue); background: rgba(0,120,212,0.08); }
+
+  .radio-option input[type=radio] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-light);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 1px;
+    cursor: pointer;
+    position: relative;
+    transition: border-color 0.1s;
+  }
+  .radio-option input[type=radio]:checked {
+    border-color: var(--accent-blue);
+  }
+  .radio-option input[type=radio]:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    width: 8px;
+    height: 8px;
+    background: var(--accent-blue);
+    border-radius: 50%;
+  }
+
+  .radio-content { flex: 1; }
+  .radio-title { font-size: 14px; color: var(--text-white); font-weight: 500; margin-bottom: 4px; }
+  .radio-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+  .link-more {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--link);
+    text-decoration: none;
+    border: 1px solid var(--link);
+    padding: 2px 8px;
+    border-radius: 2px;
+  }
+  .link-more:hover { color: var(--link-hover); border-color: var(--link-hover); background: rgba(77,166,255,0.08); }
+
+  /* Forms */
+  .form-group { margin-bottom: 24px; }
+  .form-label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .required-mark { color: #c50f1f; margin-left: 2px; }
+
+  .form-input, .form-textarea, .form-select {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 7px 10px;
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus, .form-textarea:focus, .form-select:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 1px var(--accent-blue);
+  }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
+
+  .form-textarea { resize: vertical; min-height: 100px; }
+
+  .form-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+    cursor: pointer;
+  }
+
+  .form-error { font-size: 12px; color: var(--danger); margin-top: 4px; }
+  .char-count { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-align: right; }
+
+  /* Tabs */
+  .tab-bar {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .tab {
+    padding: 8px 16px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.1s;
+  }
+  .tab:hover { color: var(--text-primary); }
+  .tab.active {
+    color: var(--text-white);
+    border-bottom-color: var(--tab-active-border);
+    font-weight: 500;
+  }
+
+  /* Table */
+  .table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    gap: 12px;
+  }
+  .table-count { font-size: 12px; color: var(--text-secondary); }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    background: var(--bg-input);
+    border: 1px solid var(--border-light);
+    border-radius: 2px;
+    padding: 4px 8px;
+    gap: 6px;
+  }
+  .search-box input {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    width: 160px;
+  }
+  .search-box input::placeholder { color: var(--text-muted); }
+  .search-icon { color: var(--text-muted); font-size: 13px; }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .data-table th {
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--table-header);
+    color: var(--text-secondary);
+    font-weight: 500;
+    border-bottom: 1px solid var(--table-border);
+    user-select: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .data-table th:hover { color: var(--text-primary); }
+  .data-table th .sort-icon { margin-left: 4px; font-size: 10px; }
+
+  .data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--table-border);
+    color: var(--text-primary);
+  }
+  .data-table tr:hover td { background: var(--table-row-hover); }
+  .data-table tr.selected td { background: rgba(0,120,212,0.12); }
+
+  /* Checkbox */
+  .cb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--border-light);
+    background: var(--checkbox-bg);
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.1s, border-color 0.1s;
+  }
+  .cb:checked {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+  }
+  .cb:checked::after {
+    content: '✓';
+    position: absolute;
+    top: -1px;
+    left: 2px;
+    font-size: 12px;
+    color: #fff;
+    font-weight: bold;
+  }
+  .cb:indeterminate {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+  }
+  .cb:indeterminate::after {
+    content: '−';
+    position: absolute;
+    top: -2px;
+    left: 2px;
+    font-size: 13px;
+    color: #fff;
+    font-weight: bold;
+  }
+
+  /* Status badge */
+  .status-ready {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--success-light);
+    font-size: 12px;
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success-light);
+    flex-shrink: 0;
+  }
+
+  .lang-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .lang-plus {
+    background: #444;
+    color: var(--text-secondary);
+    font-size: 11px;
+    padding: 1px 5px;
+    border-radius: 10px;
+    margin-left: 4px;
+  }
+
+  /* Info box */
+  .info-box {
+    background: rgba(0,120,212,0.1);
+    border: 1px solid rgba(0,120,212,0.3);
+    border-radius: 2px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  /* Section heading */
+  .section-heading {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-white);
+    margin-bottom: 8px;
+    margin-top: 24px;
+  }
+  .section-heading:first-child { margin-top: 0; }
+
+  /* User list item */
+  .user-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--table-border);
+  }
+  .user-item:hover { background: var(--table-row-hover); }
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  /* Add user panel */
+  .add-user-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .user-count-badge {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-left: auto;
+  }
+
+  /* Course list */
+  .course-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    margin-bottom: 8px;
+    background: var(--bg-secondary);
+    cursor: pointer;
+    transition: border-color 0.1s;
+  }
+  .course-item:hover { border-color: var(--border-light); background: var(--bg-hover); }
+  .course-item.selected { border-color: var(--accent-blue); background: rgba(0,120,212,0.08); }
+
+  /* Summary section */
+  .summary-section {
+    margin-bottom: 20px;
+  }
+  .summary-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .summary-value {
+    font-size: 14px;
+    color: var(--text-primary);
+  }
+  .summary-link {
+    display: inline-block;
+    font-size: 12px;
+    color: var(--link);
+    text-decoration: none;
+    margin-top: 4px;
+    cursor: pointer;
+  }
+  .summary-link:hover { text-decoration: underline; }
+
+  .send-test-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    margin-bottom: 24px;
+    transition: background 0.1s;
+  }
+  .send-test-btn:hover { background: var(--bg-hover); }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+  /* Toast */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 9999;
+  }
+  .toast {
+    background: #323232;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 3px;
+    font-size: 13px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 240px;
+    animation: slideIn 0.2s ease;
+    border-left: 3px solid var(--accent-blue);
+  }
+  .toast.success { border-left-color: var(--success-light); }
+  .toast.error { border-left-color: var(--danger); }
+
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* Loading overlay */
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9998;
+  }
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--text-primary); margin-top: 12px; font-size: 13px; }
+  .loading-inner { text-align: center; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9997;
+  }
+  .modal {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    width: 480px;
+    max-width: 95vw;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  }
+  .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-title { font-size: 15px; font-weight: 600; color: var(--text-white); }
+  .modal-close { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 18px; padding: 0 4px; }
+  .modal-close:hover { color: var(--text-primary); }
+  .modal-body { padding: 20px; }
+  .modal-footer { padding: 12px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+  .modal-user-list { max-height: 280px; overflow-y: auto; margin-bottom: 12px; }
+  .modal-user-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .modal-user-item:hover { background: var(--bg-hover); padding-left: 4px; }
+  .modal-user-item:last-child { border-bottom: none; }
+
+  .success-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+  .success-modal {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 40px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+  }
+  .success-icon { font-size: 48px; margin-bottom: 16px; }
+  .success-title { font-size: 20px; font-weight: 600; color: var(--text-white); margin-bottom: 10px; }
+  .success-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6; }
+
+  /* Inline checkbox row */
+  .cb-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    cursor: pointer;
+  }
+  .cb-label { font-size: 13px; color: var(--text-primary); cursor: pointer; }
+
+  /* Notification panel */
+  .notif-form {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 16px;
+    margin-top: 16px;
+  }
+
+  /* Info icon */
+  .info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--text-muted);
+    border-radius: 50%;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: bold;
+    cursor: default;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+
+  .recommended-badge {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: 4px;
+  }
+
+  /* End date display */
+  .end-date-info {
+    font-size: 13px;
+    color: var(--accent-cyan);
+    margin-top: 8px;
+  }
+
+  .hidden { display: none !important; }
+
+  /* Toolbar icon buttons */
+  .icon-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 2px;
+    font-size: 13px;
+    transition: background 0.1s, color 0.1s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+  .filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 2px;
+    background: none;
+    border: none;
+    font-family: inherit;
+  }
+  .filter-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  /* Progress bar on stepper items for visual flair */
+  .step-index {
+    font-size: 10px;
+    color: #fff;
+    line-height: 1;
+  }
+</style>
+</head>
+<body>
+
+<!-- App Header -->
+<div class="app-header">
+  <div class="breadcrumb">
+    <span>Simulation</span>
+    <span class="sep">›</span>
+    <span>建立</span>
+  </div>
+</div>
+
+<!-- App Body -->
+<div class="app-body">
+
+  <!-- Sidebar Stepper -->
+  <nav class="sidebar">
+    <ul class="stepper" id="stepper">
+      <!-- Steps rendered by JS -->
+    </ul>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="content-area" id="content-area">
+      <!-- Steps rendered by JS -->
+    </div>
+    <div class="wizard-footer">
+      <button class="btn btn-primary" id="btn-prev" onclick="prevStep()" style="display:none">上一步</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextStep()">下一步</button>
+      <div class="footer-right">
+        <button class="btn btn-secondary" onclick="saveAndClose()">儲存並關閉</button>
+        <button class="btn btn-secondary" onclick="cancelWizard()">取消</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Loading Overlay (hidden) -->
+<div class="loading-overlay hidden" id="loading-overlay">
+  <div class="loading-inner">
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="loading-text">處理中...</div>
+  </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal-overlay hidden" id="add-user-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">新增使用者和群組</div>
+      <button class="modal-close" onclick="closeAddUserModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="search-box" style="margin-bottom:12px; width:100%">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="搜尋使用者或群組" id="modal-search" oninput="filterModalUsers()" style="width:100%">
+      </div>
+      <div class="modal-user-list" id="modal-user-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeAddUserModal()">取消</button>
+      <button class="btn btn-primary" onclick="confirmAddUsers()">新增</button>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div class="success-overlay hidden" id="success-overlay">
+  <div class="success-modal">
+    <div class="success-icon">✅</div>
+    <div class="success-title">模擬已建立！</div>
+    <div class="success-desc">您的 Attack Simulation Training 已成功建立。<br>（此為教學沙盒，不會對真實 Microsoft 365 Tenant 產生任何影響。）</div>
+    <button class="btn btn-primary" onclick="resetWizard()">重新開始練習</button>
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+const state = {
+  currentStep: 0,
+  steps: [
+    '選取技術',
+    '名稱模擬',
+    '選取裝載和登入頁面',
+    '目標使用者',
+    '排除使用者',
+    '指派訓練',
+    '網路釣魚登入頁面',
+    '選取使用者通知',
+    '啟動詳細資料',
+    '檢閱模擬'
+  ],
+  // Selections
+  technique: 'credential-harvest',
+  simName: '',
+  simDesc: '',
+  selectedPayload: null,
+  payloadTab: 'global',
+  targetMode: 'all', // 'all' | 'specific'
+  targetUsers: [],
+  excludeUsers: false,
+  trainingPreference: 'Microsoft Recommended Training',
+  trainingAssign: 'auto', // 'auto' | 'manual'
+  selectedCourses: [],
+  trainingDueDays: '30',
+  landingPageMode: 'library', // 'library' | 'custom'
+  landingUrl: '',
+  payloadIndicators: false,
+  selectedLandingPage: null,
+  landingTab: 'global',
+  notifMode: 'microsoft', // 'none' | 'microsoft' | 'custom'
+  notifSubject: '',
+  notifBody: '',
+  notifLang: '英文',
+  notifDelivery: { n1: '', n2: '', n3: '' }, // per-notification delivery preference
+  launchMode: 'immediate', // 'immediate' | 'later'
+  simDays: 2,
+  regionAware: false,
+};
+
+// ===== MOCK DATA =====
+const techniques = [
+  { id: 'credential-harvest', label: '認證搜集', desc: '在這種技術中，惡意人士會建立一封郵件，並在郵件中包含一個 URL。當目標按下郵件中的 URL 時，他們將被帶到一個網站，而該網站通常會模仿知名服務並提示使用者輸入帳號密碼...', link: '檢視認證搜集的詳細資料' },
+  { id: 'malware-attachment', label: '惡意程式碼附件', desc: '在這種技術中，惡意人士會建立一封郵件，並在郵件中新增附件。目標開啟附件後，通常會執行某些任意程式碼，例如巨集...', link: '檢視惡意程式碼附件的詳細資料' },
+  { id: 'link-in-attachment', label: '附件中的連結', desc: '在這種技術混合式認證搜集的技術中，惡意人士會建立一封郵件，並在附件中包含一個 URL，然後將附件插入郵件中。目標開啟附件後，他們會看到置實附件中的 URL...', link: '檢視附件中的連結詳細資料' },
+  { id: 'drive-by-url', label: '連結到惡意軟體', desc: '在這種技術中，惡意人士會建立一封郵件，並在郵件中新增附件。不過，惡意人士會將附件託管在知名的檔案共用網站上（例如 SharePoint 或 Dropbox）並將 URL 插入附件檔案路徑中，而不是直接將附件插入郵件中...', link: '檢視惡意程式碼硬連結的詳細資料' },
+  { id: 'oauth', label: '偽渡式 URL', desc: '在這種技術中，惡意人士會建立一封郵件，並在郵件中包含一個 URL。當目標按下郵件中的 URL 時，他們將被帶到一個網站，該網站將嘗試執行一些背景程式碼來收集目標的相關資訊或將任意程式碼部署到目標的裝置上...', link: '檢視偽渡式 URL 的詳細資料' },
+  { id: 'oauth-consent', label: 'OAuth 同意授權', desc: '在此類型的技術中，惡意執行者已建立 Azure 應用程式，要求目標應用程式權限授與某些目標資料，應用程式將提供...', link: '檢視 Oauth 同意授權的詳細資訊' },
+  { id: 'user-guidance', label: '操作指南', desc: '在此技術類型中建立郵件，其中提供教導使用者特定動作的指示，例如如何舉報網路釣魚...', link: '查看操作指南的詳細資訊' },
+];
+
+const globalPayloads = [
+  { id: 'p1', name: 'Tesco Bank Account Verification', lang: '英文', rate: 41 },
+  { id: 'p2', name: 'Missed Mobile Call', lang: '英文', rate: 21 },
+  { id: 'p3', name: 'Expense Report Sharing', lang: '英文', rate: 40 },
+  { id: 'p4', name: 'Voicemail from Polin Marshall', lang: '英文', rate: 32 },
+  { id: 'p5', name: 'Black Friday Offer', lang: '英文', rate: 20 },
+  { id: 'p6', name: 'Secured Title Documents', lang: '英文', rate: 33 },
+  { id: 'p7', name: 'Voicemail from Patrick Stewart', lang: '英文', rate: 33 },
+  { id: 'p8', name: 'Email Quarantined Notification', lang: '英文', rate: 37 },
+];
+const tenantPayloads = [
+  { id: 'tp1', name: 'HR Password Reset', lang: '中文' },
+  { id: 'tp2', name: 'VPN Expiry Notice', lang: '英文' },
+];
+
+const allUsersPool = [
+  { id: 'u1', name: '王小明', email: 'user01@contoso.com', type: 'user', avatar: '王' },
+  { id: 'u2', name: '陳小華', email: 'user02@contoso.com', type: 'user', avatar: '陳' },
+  { id: 'g1', name: 'IT Department', email: 'it-dept@contoso.com', type: 'group', avatar: 'IT' },
+  { id: 'g2', name: 'Finance Department', email: 'finance@contoso.com', type: 'group', avatar: 'FD' },
+];
+
+const courses = [
+  { id: 'c1', name: 'Phishing Awareness', desc: '了解網路釣魚的識別方法' },
+  { id: 'c2', name: 'Password Security', desc: '密碼安全最佳實踐' },
+  { id: 'c3', name: 'Email Safety Basics', desc: '電子郵件安全基礎知識' },
+  { id: 'c4', name: 'Social Engineering Fundamentals', desc: '社交工程防禦技巧' },
+];
+
+const landingPages = [
+  { id: 'lp1', name: 'Microsoft Landing Page Template 1', lang: '德文, 英文', defaultLang: '英文', status: '進備就緒', clicks: 9 },
+  { id: 'lp2', name: 'Microsoft Landing Page Template 2', lang: '德文, 英文', defaultLang: '英文', status: '進備就緒', clicks: 1 },
+  { id: 'lp3', name: 'Microsoft Landing Page Template 3', lang: '德文, 英文', defaultLang: '英文', status: '進備就緒', clicks: 0 },
+  { id: 'lp4', name: 'Microsoft Landing Page Template 4', lang: '德文, 英文', defaultLang: '英文', status: '進備就緒', clicks: 0 },
+  { id: 'lp5', name: 'Microsoft Landing Page Template 5', lang: '德文, 英文', defaultLang: '英文', status: '進備就緒', clicks: 2 },
+];
+
+let payloadSearch = '';
+let landingSearch = '';
+let payloadSortCol = 'name';
+let payloadSortDir = 1;
+let modalSelectedIds = new Set();
+
+// ===== RENDER =====
+function renderStepper() {
+  const el = document.getElementById('stepper');
+  el.innerHTML = state.steps.map((label, i) => {
+    let cls = 'stepper-item';
+    if (i < state.currentStep) cls += ' done';
+    else if (i === state.currentStep) cls += ' active';
+    return `<li class="${cls}">
+      <div class="step-indicator"></div>
+      <div class="step-label">${label}</div>
+    </li>`;
+  }).join('');
+}
+
+function renderNav() {
+  const prev = document.getElementById('btn-prev');
+  const next = document.getElementById('btn-next');
+  prev.style.display = state.currentStep > 0 ? 'inline-flex' : 'none';
+  if (state.currentStep === state.steps.length - 1) {
+    next.textContent = '建立模擬';
+  } else {
+    next.textContent = '下一步';
+  }
+}
+
+function renderStep() {
+  renderStepper();
+  renderNav();
+  const area = document.getElementById('content-area');
+  const renderers = [
+    renderStep1, renderStep2, renderStep3, renderStep4, renderStep5,
+    renderStep6, renderStep7, renderStep8, renderStep9, renderStep10
+  ];
+  area.innerHTML = '';
+  renderers[state.currentStep]();
+  area.scrollTop = 0;
+}
+
+// ===== STEP 1 =====
+function renderStep1() {
+  const area = document.getElementById('content-area');
+  area.innerHTML = `
+    <div class="page-title">選取技術</div>
+    <div class="page-description">選取您要用於此模擬的社交工程技巧。我們已從 MITRE 攻擊架構中策劃這些項目，根據您的選項目，您將能夠使用特定類型的承載。</div>
+    <div class="radio-group" id="technique-group">
+      ${techniques.map(t => `
+        <div class="radio-option ${state.technique === t.id ? 'selected' : ''}" onclick="selectTechnique('${t.id}', this)">
+          <input type="radio" name="technique" value="${t.id}" ${state.technique === t.id ? 'checked' : ''} onchange="selectTechnique('${t.id}', this.closest('.radio-option'))">
+          <div class="radio-content">
+            <div class="radio-title">${t.label}</div>
+            <div class="radio-desc">${t.desc}</div>
+            <a class="link-more" href="#" onclick="return false">${t.link}</a>
+          </div>
+        </div>
+      `).join('')}
+    </div>`;
+}
+
+function selectTechnique(id, el) {
+  state.technique = id;
+  document.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  el.querySelector('input[type=radio]').checked = true;
+}
+
+// ===== STEP 2 =====
+function renderStep2() {
+  const area = document.getElementById('content-area');
+  area.innerHTML = `
+    <div class="page-title">名稱模擬</div>
+    <div class="form-group">
+      <label class="form-label">模擬名稱 <span class="required-mark">*</span></label>
+      <input class="form-input" id="sim-name" type="text" placeholder="輸入 [模擬名稱]" value="${escHtml(state.simName)}" oninput="state.simName=this.value; updateCharCount('sim-name','sim-name-count',100)" maxlength="100">
+      <div class="form-error hidden" id="sim-name-error">此欄位為必填</div>
+      <div class="char-count" id="sim-name-count">${state.simName.length}/100</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">描述</label>
+      <textarea class="form-textarea" id="sim-desc" placeholder="輸入 [模擬描述]" oninput="state.simDesc=this.value; updateCharCount('sim-desc','sim-desc-count',500)" maxlength="500">${escHtml(state.simDesc)}</textarea>
+      <div class="char-count" id="sim-desc-count">${state.simDesc.length}/500</div>
+    </div>`;
+}
+
+function updateCharCount(inputId, countId, max) {
+  const el = document.getElementById(inputId);
+  const countEl = document.getElementById(countId);
+  if (el && countEl) countEl.textContent = `${el.value.length}/${max}`;
+}
+
+// ===== STEP 3 =====
+function renderStep3() {
+  const area = document.getElementById('content-area');
+  const payloads = state.payloadTab === 'global' ? globalPayloads : tenantPayloads;
+  const filtered = payloads.filter(p => p.name.toLowerCase().includes(payloadSearch.toLowerCase()));
+
+  area.innerHTML = `
+    <div class="page-title">選取裝載和登入頁面</div>
+    <div class="page-description">選取此模擬技術的承載。您可以建立或收集自己的承載以新增此清單。請注意，如果您建立新承載，將會重新導向至承載建立精靈。</div>
+    <div class="tab-bar">
+      <div class="tab ${state.payloadTab==='global'?'active':''}" onclick="switchPayloadTab('global')">全域承載</div>
+      <div class="tab ${state.payloadTab==='tenant'?'active':''}" onclick="switchPayloadTab('tenant')">租用戶裝載</div>
+    </div>
+    <div class="table-toolbar">
+      <span class="table-count">${filtered.length} 個項目</span>
+      <div class="toolbar-right">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="搜尋" value="${escHtml(payloadSearch)}" oninput="payloadSearch=this.value;renderStep()">
+        </div>
+        <button class="filter-btn">🔽 篩選</button>
+      </div>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:32px"><input type="checkbox" class="cb" id="payload-all-cb" onchange="toggleAllPayloads(this)"></th>
+          <th onclick="sortPayloads('name')">承載名稱 <span class="sort-icon">${payloadSortCol==='name'?(payloadSortDir===1?'↓':'↑'):'↕'}</span></th>
+          <th onclick="sortPayloads('lang')">語言 <span class="sort-icon">${payloadSortCol==='lang'?(payloadSortDir===1?'↓':'↑'):'↕'}</span></th>
+          ${state.payloadTab==='global'?`<th onclick="sortPayloads('rate')">預測入侵機率 (%) <span class="sort-icon">${payloadSortCol==='rate'?(payloadSortDir===1?'↓':'↑'):'↕'}</span></th>`:''}
+        </tr>
+      </thead>
+      <tbody>
+        ${filtered.map(p => `
+          <tr class="${state.selectedPayload===p.id?'selected':''}">
+            <td><input type="checkbox" class="cb" ${state.selectedPayload===p.id?'checked':''} onchange="selectPayload('${p.id}',this)"></td>
+            <td><span style="cursor:pointer;color:${state.selectedPayload===p.id?'var(--accent-cyan)':'var(--text-primary)'}" onclick="selectPayloadRow('${p.id}')">${escHtml(p.name)}</span></td>
+            <td>${p.lang}</td>
+            ${state.payloadTab==='global'?`<td>${p.rate}</td>`:''}
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function switchPayloadTab(tab) {
+  state.payloadTab = tab;
+  state.selectedPayload = null;
+  payloadSearch = '';
+  renderStep();
+}
+
+function selectPayload(id, cb) {
+  state.selectedPayload = cb.checked ? id : null;
+  renderStep();
+}
+
+function selectPayloadRow(id) {
+  state.selectedPayload = state.selectedPayload === id ? null : id;
+  renderStep();
+}
+
+function toggleAllPayloads(cb) {
+  // demo: just show all selected visually
+}
+
+function sortPayloads(col) {
+  if (payloadSortCol === col) payloadSortDir *= -1;
+  else { payloadSortCol = col; payloadSortDir = 1; }
+  const arr = state.payloadTab === 'global' ? globalPayloads : tenantPayloads;
+  arr.sort((a, b) => {
+    const av = a[col] ?? '';
+    const bv = b[col] ?? '';
+    return av < bv ? -payloadSortDir : av > bv ? payloadSortDir : 0;
+  });
+  renderStep();
+}
+
+// ===== STEP 4 =====
+function renderStep4() {
+  const area = document.getElementById('content-area');
+  const users = state.targetUsers;
+  area.innerHTML = `
+    <div class="page-title">目標使用者</div>
+    <div class="page-description">新增現有的使用者和群組，或匯入電子郵件地址清單。</div>
+    <div style="margin-bottom:16px">
+      <div class="radio-option ${state.targetMode==='all'?'selected':''}" style="border:1px solid var(--border);margin-bottom:6px;padding:8px 12px;" onclick="setTargetMode('all')">
+        <input type="radio" name="targetMode" ${state.targetMode==='all'?'checked':''} onchange="setTargetMode('all')">
+        <div class="radio-content"><div class="radio-title" style="font-size:13px">包含我組織中的所有使用者</div></div>
+      </div>
+      <div class="radio-option ${state.targetMode==='specific'?'selected':''}" style="border:1px solid var(--border);padding:8px 12px;" onclick="setTargetMode('specific')">
+        <input type="radio" name="targetMode" ${state.targetMode==='specific'?'checked':''} onchange="setTargetMode('specific')">
+        <div class="radio-content"><div class="radio-title" style="font-size:13px">僅包含特定使用者和群組</div></div>
+      </div>
+    </div>
+    <hr class="divider">
+    ${state.targetMode==='specific' ? `
+    <div class="add-user-bar">
+      <button class="btn btn-ghost" onclick="openAddUserModal()">＋ 新增使用者</button>
+      <button class="btn btn-ghost" onclick="fakeImport()">↑ 匯入</button>
+      <div class="user-count-badge">${users.length} 使用者或群組</div>
+      <div class="search-box" style="margin-left:8px">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="搜尋">
+      </div>
+    </div>
+    ${users.length === 0 ? `<div style="padding:32px;text-align:center;color:var(--text-muted);font-size:13px">尚未新增使用者或群組。按「新增使用者」以開始。</div>` :
+      `<div>${users.map(u => `
+        <div class="user-item">
+          <div class="user-avatar">${u.avatar}</div>
+          <div>
+            <div style="font-size:13px;color:var(--text-primary)">${escHtml(u.name)}</div>
+            <div style="font-size:11px;color:var(--text-muted)">${escHtml(u.email)}</div>
+          </div>
+          <button class="icon-btn" style="margin-left:auto;color:var(--danger)" onclick="removeTargetUser('${u.id}')">✕ 移除</button>
+        </div>`).join('')}</div>`
+    }` : `<div style="padding:24px 0;color:var(--text-secondary);font-size:13px">所有組織使用者將成為目標。</div>`}`;
+}
+
+function setTargetMode(mode) {
+  state.targetMode = mode;
+  renderStep();
+}
+
+function removeTargetUser(id) {
+  state.targetUsers = state.targetUsers.filter(u => u.id !== id);
+  renderStep();
+}
+
+function fakeImport() {
+  showToast('匯入功能為模擬示範，不執行實際操作。', 'info');
+}
+
+// ===== STEP 5 =====
+function renderStep5() {
+  const area = document.getElementById('content-area');
+  area.innerHTML = `
+    <div class="page-title">排除使用者</div>
+    <div class="page-description">選擇要從此行銷活動排除的使用者或群組。</div>
+    <label class="cb-row">
+      <input type="checkbox" class="cb" ${state.excludeUsers?'checked':''} onchange="state.excludeUsers=this.checked;renderStep5Expand()">
+      <span class="cb-label">從此模擬中排除部分目標使用者</span>
+    </label>
+    <div id="exclude-expand" class="${state.excludeUsers?'':'hidden'}" style="margin-top:16px;padding:12px;border:1px solid var(--border);border-radius:2px;">
+      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">選擇要排除的使用者（目前目標：${state.targetUsers.length > 0 ? state.targetUsers.map(u=>u.name).join('、') : '所有使用者'}）</div>
+      <div style="font-size:13px;color:var(--text-muted)">0 使用者或群組</div>
+    </div>`;
+}
+
+function renderStep5Expand() {
+  const el = document.getElementById('exclude-expand');
+  if (el) el.classList.toggle('hidden', !state.excludeUsers);
+}
+
+// ===== STEP 6 =====
+function renderStep6() {
+  const area = document.getElementById('content-area');
+  const manualSelected = state.selectedCourses;
+  area.innerHTML = `
+    <div class="page-title">指派訓練</div>
+    <div class="page-description">選取訓練喜好設定、作業，並自訂本次模擬的平台網頁。</div>
+    <div class="section-heading">喜好設定</div>
+    <div class="form-group">
+      <label class="form-label">選取訓練內容喜好設定</label>
+      <select class="form-select" onchange="state.trainingPreference=this.value">
+        <option value="Microsoft Recommended Training" ${state.trainingPreference==='Microsoft Recommended Training'?'selected':''}>Microsoft 訓練體驗 (建議使用)</option>
+        <option value="Custom" ${state.trainingPreference==='Custom'?'selected':''}>自訂訓練體驗</option>
+      </select>
+    </div>
+    <div style="margin-bottom:16px">
+      <div class="radio-option ${state.trainingAssign==='auto'?'selected':''}" style="border:1px solid var(--border);margin-bottom:8px;padding:10px 14px;" onclick="setTrainingAssign('auto')">
+        <input type="radio" name="trainingAssign" ${state.trainingAssign==='auto'?'checked':''}>
+        <div class="radio-content">
+          <div class="radio-title">為我指派訓練 <span class="recommended-badge">(建議使用)</span></div>
+          <div class="radio-desc">使用學習路徑，讓 Microsoft 根據使用者先前的模擬和訓練結果，指派訓練課程與單元。</div>
+        </div>
+      </div>
+      <div class="radio-option ${state.trainingAssign==='manual'?'selected':''}" style="border:1px solid var(--border);padding:10px 14px;" onclick="setTrainingAssign('manual')">
+        <input type="radio" name="trainingAssign" ${state.trainingAssign==='manual'?'checked':''}>
+        <div class="radio-content">
+          <div class="radio-title">自行選取訓練課程與單元</div>
+          <div class="radio-desc">我想要從 Microsoft 目錄選取特定訓練課程與單元</div>
+        </div>
+      </div>
+    </div>
+    ${state.trainingAssign==='manual' ? `
+    <div style="margin-bottom:20px">
+      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px">選擇課程：</div>
+      ${courses.map(c => `
+        <div class="course-item ${manualSelected.includes(c.id)?'selected':''}" onclick="toggleCourse('${c.id}')">
+          <input type="checkbox" class="cb" ${manualSelected.includes(c.id)?'checked':''} onchange="toggleCourse('${c.id}')">
+          <div>
+            <div style="font-size:13px;color:var(--text-white)">${c.name}</div>
+            <div style="font-size:11px;color:var(--text-muted)">${c.desc}</div>
+          </div>
+        </div>`).join('')}
+    </div>` : ''}
+    <div class="section-heading">到期日</div>
+    <div class="form-group">
+      <label class="form-label">選取訓練到期日</label>
+      <select class="form-select" onchange="state.trainingDueDays=this.value">
+        <option value="7" ${state.trainingDueDays==='7'?'selected':''}>7 [模擬] 結束後的天數</option>
+        <option value="14" ${state.trainingDueDays==='14'?'selected':''}>14 [模擬] 結束後的天數</option>
+        <option value="30" ${state.trainingDueDays==='30'?'selected':''}>30 [模擬] 結束後的天數</option>
+        <option value="60" ${state.trainingDueDays==='60'?'selected':''}>60 [模擬] 結束後的天數</option>
+      </select>
+    </div>`;
+}
+
+function setTrainingAssign(val) {
+  state.trainingAssign = val;
+  renderStep();
+}
+
+function toggleCourse(id) {
+  if (state.selectedCourses.includes(id)) {
+    state.selectedCourses = state.selectedCourses.filter(c => c !== id);
+  } else {
+    state.selectedCourses.push(id);
+  }
+  renderStep();
+}
+
+// ===== STEP 7 =====
+function renderStep7() {
+  const area = document.getElementById('content-area');
+  const pages = landingPages.filter(p => p.name.toLowerCase().includes(landingSearch.toLowerCase()));
+  area.innerHTML = `
+    <div class="page-title">選取網路釣魚登陸頁面</div>
+    <div class="page-description">選取登陸頁面，在網路釣魚後為使用者提供學習時間。 <a class="link-more" href="#" onclick="return false">深入了解</a></div>
+    <div style="margin-bottom:16px">
+      <div class="radio-option ${state.landingPageMode==='library'?'selected':''}" style="border:1px solid var(--border);margin-bottom:6px;padding:8px 12px;" onclick="setLandingMode('library')">
+        <input type="radio" name="landingMode" ${state.landingPageMode==='library'?'checked':''}>
+        <div class="radio-content"><div class="radio-title" style="font-size:13px">使用文件庫中的登入頁面</div></div>
+      </div>
+      <div class="radio-option ${state.landingPageMode==='custom'?'selected':''}" style="border:1px solid var(--border);padding:8px 12px;" onclick="setLandingMode('custom')">
+        <input type="radio" name="landingMode" ${state.landingPageMode==='custom'?'checked':''}>
+        <div class="radio-content"><div class="radio-title" style="font-size:13px">使用自訂 URL</div></div>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="cb-row">
+        <input type="checkbox" class="cb" ${state.payloadIndicators?'checked':''} onchange="state.payloadIndicators=this.checked">
+        <span class="cb-label">在電子郵件中新增裝載指示器，它們可協助使用者了解如何識別網路釣魚電子郵件。</span>
+      </label>
+    </div>
+    ${state.landingPageMode==='custom' ? `
+    <div class="form-group">
+      <label class="form-label">自訂 URL <span class="required-mark">*</span></label>
+      <input class="form-input" type="text" placeholder="https://..." value="${escHtml(state.landingUrl)}" oninput="state.landingUrl=this.value">
+    </div>` : `
+    <div class="tab-bar">
+      <div class="tab ${state.landingTab==='global'?'active':''}" onclick="state.landingTab='global';renderStep()">全域登陸頁面</div>
+      <div class="tab ${state.landingTab==='tenant'?'active':''}" onclick="state.landingTab='tenant';renderStep()">租用戶登陸頁面</div>
+    </div>
+    <div class="table-toolbar">
+      <button class="icon-btn">🔄 重新整理</button>
+      <div class="toolbar-right">
+        <span class="table-count">${pages.length} 個項目</span>
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="搜尋" value="${escHtml(landingSearch)}" oninput="landingSearch=this.value;renderStep()">
+        </div>
+        <button class="filter-btn">🔽 篩選</button>
+      </div>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:32px"></th>
+          <th>名稱 ↓</th>
+          <th>語言</th>
+          <th>預設語言</th>
+          <th>狀態</th>
+          <th>連結的數</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${pages.map(p => `
+          <tr class="${state.selectedLandingPage===p.id?'selected':''}">
+            <td><input type="checkbox" class="cb" ${state.selectedLandingPage===p.id?'checked':''} onchange="selectLandingPage('${p.id}',this)"></td>
+            <td style="color:var(--text-primary)">${escHtml(p.name)}</td>
+            <td><span class="lang-badge">${p.lang}<span class="lang-plus">+10</span></span></td>
+            <td>${p.defaultLang}</td>
+            <td><span class="status-ready"><span class="status-dot"></span>${p.status}</span></td>
+            <td>${p.clicks}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`}`;
+}
+
+function setLandingMode(mode) {
+  state.landingPageMode = mode;
+  renderStep();
+}
+
+function selectLandingPage(id, cb) {
+  state.selectedLandingPage = cb.checked ? id : null;
+  renderStep();
+}
+
+// ===== STEP 8 =====
+const msNotifications = [
+  {
+    id: 'n1',
+    name: 'Microsoft default positive reinforcement notification',
+    lang: '英文, 德文',
+    type: '正面強化通知',
+    deliveryOptions: ['請勿傳遞', '模擬結束後傳遞', '模擬期間傳遞'],
+    defaultDelivery: '',
+  },
+  {
+    id: 'n2',
+    name: 'Microsoft default training assignment notification',
+    lang: '英文, 德文',
+    type: '訓練指派通知',
+    deliveryOptions: null, // 不適用
+    defaultDelivery: null,
+  },
+  {
+    id: 'n3',
+    name: 'Microsoft default training reminder notification',
+    lang: '英文, 德文',
+    type: '訓練提醒通知',
+    deliveryOptions: ['每週兩次', '每週'],
+    defaultDelivery: '',
+  },
+];
+
+function renderStep8() {
+  const area = document.getElementById('content-area');
+
+  const notifTable = state.notifMode === 'microsoft' ? `
+    <div class="form-group" style="margin-top:20px">
+      <label class="form-label">選取預設語言 <span class="required-mark">*</span></label>
+      <select class="form-select" style="max-width:220px" onchange="state.notifLang=this.value">
+        <option value="英文" ${state.notifLang==='英文'?'selected':''}>英文</option>
+        <option value="中文" ${state.notifLang==='中文'?'selected':''}>中文</option>
+        <option value="日文" ${state.notifLang==='日文'?'selected':''}>日文</option>
+      </select>
+    </div>
+    <div style="margin-bottom:8px">
+      <button class="icon-btn" onclick="showToast('重新整理完成。')">🔄 重新整理</button>
+      <span style="float:right;font-size:12px;color:var(--text-secondary);line-height:28px">3 個項目</span>
+    </div>
+    <table class="data-table" style="table-layout:fixed">
+      <colgroup>
+        <col style="width:38%">
+        <col style="width:15%">
+        <col style="width:15%">
+        <col style="width:26%">
+        <col style="width:6%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>通知 ↓</th>
+          <th>語言 ↓</th>
+          <th>類型 ↓</th>
+          <th>傳遞喜好設定 ↓</th>
+          <th>動作 ↓</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${msNotifications.map(n => `
+          <tr>
+            <td>
+              <a href="#" onclick="return false" style="color:var(--link);font-size:13px">${n.name}</a>
+            </td>
+            <td>
+              <span class="lang-badge" style="font-size:12px">${n.lang}<span class="lang-plus">+10</span></span>
+            </td>
+            <td style="font-size:12px;color:var(--text-secondary)">${n.type}</td>
+            <td>
+              ${n.deliveryOptions === null
+                ? `<span style="font-size:12px;color:var(--text-muted)">不適用</span>`
+                : `<select class="form-select" style="font-size:12px;padding:4px 28px 4px 8px"
+                    onchange="state.notifDelivery['${n.id}']=this.value">
+                    <option value="" ${!state.notifDelivery[n.id]?'selected':''}>傳遞喜好設定</option>
+                    ${n.deliveryOptions.map(opt =>
+                      `<option value="${opt}" ${state.notifDelivery[n.id]===opt?'selected':''}>${opt}</option>`
+                    ).join('')}
+                  </select>`
+              }
+            </td>
+            <td style="text-align:center">
+              <button class="icon-btn" title="預覽" onclick="showToast('預覽：${n.name}（模擬示範）')" style="color:var(--accent-cyan);font-size:16px">👁</button>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>` : '';
+
+  const customForm = state.notifMode === 'custom' ? `
+    <div class="notif-form">
+      <div class="form-group">
+        <label class="form-label">主旨</label>
+        <input class="form-input" type="text" placeholder="輸入通知主旨" value="${escHtml(state.notifSubject)}" oninput="state.notifSubject=this.value">
+      </div>
+      <div class="form-group">
+        <label class="form-label">電子郵件內文</label>
+        <textarea class="form-textarea" placeholder="輸入電子郵件內文..." oninput="state.notifBody=this.value">${escHtml(state.notifBody)}</textarea>
+      </div>
+      <button class="btn btn-outline-blue" onclick="showToast('預覽功能為模擬示範。')">預覽</button>
+    </div>` : '';
+
+  area.innerHTML = `
+    <div class="page-title">選取使用者通知</div>
+    <div class="page-description">選取此行銷活動的使用者通知喜好設定。</div>
+
+    <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:16px">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:6px 0" onclick="setNotifMode('none')">
+        <input type="radio" name="notifMode" ${state.notifMode==='none'?'checked':''} style="width:16px;height:16px;accent-color:var(--accent-blue);cursor:pointer">
+        <span style="font-size:13px;color:var(--text-primary)">不傳送通知 <span class="info-icon">i</span></span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:6px 0" onclick="setNotifMode('microsoft')">
+        <input type="radio" name="notifMode" ${state.notifMode==='microsoft'?'checked':''} style="width:16px;height:16px;accent-color:var(--accent-blue);cursor:pointer">
+        <span style="font-size:13px;color:var(--text-primary)">Microsoft 預設通知 <span style="color:var(--accent-cyan)">(建議)</span> <span class="info-icon">i</span></span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:6px 0" onclick="setNotifMode('custom')">
+        <input type="radio" name="notifMode" ${state.notifMode==='custom'?'checked':''} style="width:16px;height:16px;accent-color:var(--accent-blue);cursor:pointer">
+        <span style="font-size:13px;color:var(--text-primary)">自訂的使用者通知 <span class="info-icon">i</span></span>
+      </label>
+    </div>
+
+    ${notifTable}
+    ${customForm}`;
+}
+
+function setNotifMode(mode) {
+  state.notifMode = mode;
+  renderStep();
+}
+
+// ===== STEP 9 =====
+function renderStep9() {
+  const area = document.getElementById('content-area');
+  const endDate = getEndDate(state.simDays);
+  area.innerHTML = `
+    <div class="page-title">啟動詳細資料</div>
+    <div class="page-description">設定您要讓此模擬啟動的時間，以及是否要從使用者的收件匣移除承載。</div>
+    <div class="radio-option ${state.launchMode==='immediate'?'selected':''}" style="border:1px solid var(--border);margin-bottom:8px;padding:10px 14px;" onclick="setLaunchMode('immediate')">
+      <input type="radio" name="launchMode" ${state.launchMode==='immediate'?'checked':''}>
+      <div class="radio-content"><div class="radio-title">在我完成時立即啟動此模擬</div></div>
+    </div>
+    <div class="radio-option ${state.launchMode==='later'?'selected':''}" style="border:1px solid var(--border);padding:10px 14px;" onclick="setLaunchMode('later')">
+      <input type="radio" name="launchMode" ${state.launchMode==='later'?'checked':''}>
+      <div class="radio-content"><div class="radio-title">將此模擬排程在稍後啟動</div></div>
+    </div>
+    <div class="form-group" style="margin-top:24px">
+      <label class="form-label">設定結束模擬的天數 <span class="required-mark">*</span></label>
+      <input class="form-input" type="number" min="1" max="365" value="${state.simDays}" oninput="state.simDays=parseInt(this.value)||2;updateEndDate()" id="sim-days-input" style="max-width:300px">
+      <div class="end-date-info" id="end-date-info">您的模擬將於 ${endDate} 結束</div>
+    </div>
+    <label class="cb-row">
+      <input type="checkbox" class="cb" ${state.regionAware?'checked':''} onchange="state.regionAware=this.checked">
+      <span class="cb-label">啟用地區感知時區傳遞</span>
+    </label>`;
+}
+
+function setLaunchMode(mode) {
+  state.launchMode = mode;
+  renderStep();
+}
+
+function updateEndDate() {
+  const el = document.getElementById('end-date-info');
+  if (el) el.textContent = `您的模擬將於 ${getEndDate(state.simDays)} 結束`;
+}
+
+function getEndDate(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + (parseInt(days) || 2));
+  return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+}
+
+function getToday() {
+  const d = new Date();
+  return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+}
+
+function getTodayTime() {
+  const d = new Date();
+  const h = d.getHours();
+  const m = String(d.getMinutes()).padStart(2,'0');
+  const s = String(d.getSeconds()).padStart(2,'0');
+  const ampm = h >= 12 ? '下午' : '上午';
+  const h12 = h % 12 || 12;
+  return `${ampm}${h12}:${m}:${s}`;
+}
+
+// ===== STEP 10 =====
+function renderStep10() {
+  const area = document.getElementById('content-area');
+  const tech = techniques.find(t => t.id === state.technique);
+  const payload = [...globalPayloads,...tenantPayloads].find(p => p.id === state.selectedPayload);
+  const lp = landingPages.find(p => p.id === state.selectedLandingPage);
+  const today = getToday();
+  const todayTime = getTodayTime();
+  const endDate = getEndDate(state.simDays);
+
+  area.innerHTML = `
+    <div class="page-title">檢閱模擬</div>
+    <div class="page-description">啟動之前，請先檢閱您的模擬資訊。您目前已安排在 ${today} 的 ${todayTime} 啟動。其會於 ${endDate} 的 ${todayTime} 結束。</div>
+    <button class="send-test-btn" onclick="sendTestEmail()">▷ 傳送測試</button>
+    <hr class="divider">
+    <div class="summary-section">
+      <div class="summary-label">傳遞平台</div>
+      <div class="summary-value">Email</div>
+    </div>
+    <div class="summary-section">
+      <div class="summary-label">技術</div>
+      <div class="summary-value">${tech ? tech.label : '認證搜集'}</div>
+    </div>
+    <div class="summary-section">
+      <div class="summary-label">名稱</div>
+      <div class="summary-value">${escHtml(state.simName) || '（未命名）'}</div>
+      <a class="summary-link" onclick="goToStep(1)">編輯名稱</a>
+    </div>
+    <div class="summary-section">
+      <div class="summary-label">承載</div>
+      <div class="summary-value">${payload ? escHtml(payload.name) : '【重要】您的帳戶異常，請立即處理'}</div>
+      <a class="summary-link" onclick="goToStep(2)">編輯承載</a>
+    </div>
+    <div class="summary-section">
+      <div class="summary-label">目標使用者</div>
+      <div class="summary-value">${state.targetMode==='all' ? '所有使用者 目標使用者或群組' : `${state.targetUsers.length} 位使用者或群組`}<br>已排除 0 使用者或群組</div>
+      <a class="summary-link" onclick="goToStep(3)">編輯使用者</a>
+    </div>
+    <div class="summary-section">
+      <div class="summary-label">訓練</div>
+      <div class="summary-value">${state.trainingAssign==='auto' ? 'Microsoft 建議訓練（自動指派）' : `已選擇 ${state.selectedCourses.length} 門課程`}</div>
+    </div>
+    <div class="summary-section">
+      <div class="summary-label">登陸頁面</div>
+      <div class="summary-value">${lp ? escHtml(lp.name) : state.landingPageMode==='custom' ? (state.landingUrl||'自訂 URL') : '未選取'}</div>
+    </div>
+    <div class="summary-section">
+      <div class="summary-label">模擬期間</div>
+      <div class="summary-value">
+        <div>開始日期：${today}</div>
+        <div>結束日期：${endDate}</div>
+      </div>
+    </div>`;
+}
+
+function goToStep(i) {
+  state.currentStep = i;
+  renderStep();
+}
+
+// ===== MODAL =====
+function openAddUserModal() {
+  modalSelectedIds = new Set();
+  renderModalUsers('');
+  document.getElementById('add-user-modal').classList.remove('hidden');
+}
+
+function closeAddUserModal() {
+  document.getElementById('add-user-modal').classList.add('hidden');
+}
+
+function renderModalUsers(query) {
+  const list = document.getElementById('modal-user-list');
+  const filtered = allUsersPool.filter(u =>
+    !state.targetUsers.find(t => t.id === u.id) &&
+    (u.name.toLowerCase().includes(query.toLowerCase()) || u.email.toLowerCase().includes(query.toLowerCase()))
+  );
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:13px">找不到使用者</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(u => `
+    <div class="modal-user-item" onclick="toggleModalUser('${u.id}',this)">
+      <input type="checkbox" class="cb" id="mcb-${u.id}" ${modalSelectedIds.has(u.id)?'checked':''} onchange="toggleModalUser('${u.id}',this)">
+      <div class="user-avatar" style="background:${u.type==='group'?'#6b2fbb':'var(--accent-blue)'}">${u.avatar}</div>
+      <div>
+        <div style="font-size:13px;color:var(--text-primary)">${escHtml(u.name)}</div>
+        <div style="font-size:11px;color:var(--text-muted)">${escHtml(u.email)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleModalUser(id, el) {
+  if (modalSelectedIds.has(id)) modalSelectedIds.delete(id);
+  else modalSelectedIds.add(id);
+  const cb = document.getElementById('mcb-' + id);
+  if (cb) cb.checked = modalSelectedIds.has(id);
+}
+
+function filterModalUsers() {
+  const q = document.getElementById('modal-search').value;
+  renderModalUsers(q);
+}
+
+function confirmAddUsers() {
+  modalSelectedIds.forEach(id => {
+    if (!state.targetUsers.find(u => u.id === id)) {
+      const u = allUsersPool.find(u => u.id === id);
+      if (u) state.targetUsers.push(u);
+    }
+  });
+  closeAddUserModal();
+  showToast(`已新增 ${modalSelectedIds.size} 位使用者或群組`, 'success');
+  renderStep();
+}
+
+// ===== NAVIGATION =====
+function nextStep() {
+  if (state.currentStep === state.steps.length - 1) {
+    createSimulation();
+    return;
+  }
+  if (!validateStep()) return;
+  state.currentStep++;
+  renderStep();
+}
+
+function prevStep() {
+  if (state.currentStep > 0) {
+    state.currentStep--;
+    renderStep();
+  }
+}
+
+function validateStep() {
+  if (state.currentStep === 1) {
+    const name = document.getElementById('sim-name');
+    if (!name || !name.value.trim()) {
+      const err = document.getElementById('sim-name-error');
+      if (err) err.classList.remove('hidden');
+      showToast('請輸入模擬名稱', 'error');
+      return false;
+    }
+    state.simName = name.value.trim();
+    const desc = document.getElementById('sim-desc');
+    if (desc) state.simDesc = desc.value;
+  }
+  return true;
+}
+
+// ===== CREATE SIMULATION =====
+function createSimulation() {
+  showLoading('正在建立模擬...');
+  setTimeout(() => {
+    hideLoading();
+    document.getElementById('success-overlay').classList.remove('hidden');
+  }, 2200);
+}
+
+function sendTestEmail() {
+  showLoading('傳送測試中...');
+  setTimeout(() => {
+    hideLoading();
+    showToast('測試郵件已傳送（模擬示範）', 'success');
+  }, 1400);
+}
+
+function saveAndClose() {
+  showToast('草稿已儲存（模擬示範）', 'info');
+}
+
+function cancelWizard() {
+  if (confirm('確定要取消？您的進度將不會儲存。')) {
+    resetWizard();
+  }
+}
+
+function resetWizard() {
+  document.getElementById('success-overlay').classList.add('hidden');
+  Object.assign(state, {
+    currentStep: 0, technique: 'credential-harvest', simName: '', simDesc: '',
+    selectedPayload: null, payloadTab: 'global', targetMode: 'all', targetUsers: [],
+    excludeUsers: false, trainingAssign: 'auto', selectedCourses: [], trainingDueDays: '30',
+    landingPageMode: 'library', landingUrl: '', payloadIndicators: false,
+    selectedLandingPage: null, landingTab: 'global', notifMode: 'microsoft',
+    notifSubject: '', notifBody: '', notifLang: '英文', notifDelivery: { n1: '', n2: '', n3: '' },
+    launchMode: 'immediate', simDays: 2, regionAware: false,
+  });
+  payloadSearch = ''; landingSearch = '';
+  renderStep();
+}
+
+// ===== UTILS =====
+function showLoading(text='處理中...') {
+  document.getElementById('loading-text').textContent = text;
+  document.getElementById('loading-overlay').classList.remove('hidden');
+}
+function hideLoading() {
+  document.getElementById('loading-overlay').classList.add('hidden');
+}
+
+function showToast(msg, type='info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icon = type==='success'?'✅':type==='error'?'❌':'ℹ️';
+  t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+function escHtml(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ===== INIT =====
+renderStep();
+</script>
+</body>
+</html>
