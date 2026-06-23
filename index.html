@@ -6,7 +6,7 @@
 <title>Attack Simulation Training - Microsoft Defender</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
   :root {
     --bg-primary: #1b1b1b;
     --bg-secondary: #252526;
@@ -41,7 +41,7 @@
     --table-row-hover: #2a2d2e;
     --table-border: #3d3d3d;
   }
-
+ 
   html, body {
     height: 100%;
     background: var(--bg-primary);
@@ -50,13 +50,13 @@
     font-size: 14px;
     line-height: 1.4;
   }
-
+ 
   /* Scrollbar */
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
   ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
   ::-webkit-scrollbar-thumb:hover { background: #777; }
-
+ 
   /* Layout */
   .app-header {
     height: 32px;
@@ -69,7 +69,7 @@
     color: var(--text-secondary);
     flex-shrink: 0;
   }
-
+ 
   .breadcrumb {
     display: flex;
     align-items: center;
@@ -79,13 +79,13 @@
   }
   .breadcrumb span { color: var(--text-secondary); }
   .breadcrumb .sep { color: var(--text-muted); }
-
+ 
   .app-body {
     display: flex;
     height: calc(100vh - 32px);
     overflow: hidden;
   }
-
+ 
   /* Sidebar / Stepper */
   .sidebar {
     width: 240px;
@@ -96,13 +96,13 @@
     overflow-y: auto;
     flex-shrink: 0;
   }
-
+ 
   .stepper {
     list-style: none;
     padding: 0 0 0 28px;
     position: relative;
   }
-
+ 
   .stepper-item {
     display: flex;
     align-items: flex-start;
@@ -110,7 +110,7 @@
     position: relative;
     min-height: 52px;
   }
-
+ 
   .stepper-item:not(:last-child)::after {
     content: '';
     position: absolute;
@@ -120,12 +120,12 @@
     height: calc(100% - 4px);
     background: var(--stepper-inactive);
   }
-
+ 
   .stepper-item.done:not(:last-child)::after,
   .stepper-item.active:not(:last-child)::after {
     background: var(--stepper-done);
   }
-
+ 
   .step-indicator {
     width: 20px;
     height: 20px;
@@ -141,25 +141,25 @@
     position: relative;
     z-index: 1;
   }
-
+ 
   .stepper-item.done .step-indicator {
     border-color: var(--stepper-done);
     background: var(--stepper-done);
   }
-
+ 
   .stepper-item.active .step-indicator {
     border-color: var(--stepper-active);
     background: var(--stepper-active);
     box-shadow: 0 0 0 3px rgba(0,120,212,0.3);
   }
-
+ 
   .stepper-item.done .step-indicator::after {
     content: '✓';
     color: #fff;
     font-size: 11px;
     font-weight: bold;
   }
-
+ 
   .stepper-item.active .step-indicator::after {
     content: '';
     width: 8px;
@@ -167,17 +167,17 @@
     background: #fff;
     border-radius: 50%;
   }
-
+ 
   .step-label {
     font-size: 13px;
     color: var(--text-muted);
     padding-top: 2px;
     cursor: default;
   }
-
+ 
   .stepper-item.done .step-label { color: var(--text-secondary); }
   .stepper-item.active .step-label { color: var(--text-white); font-weight: 600; }
-
+ 
   /* Main content */
   .main-content {
     flex: 1;
@@ -186,27 +186,27 @@
     overflow: hidden;
     background: var(--bg-primary);
   }
-
+ 
   .content-area {
     flex: 1;
     overflow-y: auto;
     padding: 32px 48px 32px 48px;
   }
-
+ 
   .page-title {
     font-size: 22px;
     font-weight: 600;
     color: var(--text-white);
     margin-bottom: 10px;
   }
-
+ 
   .page-description {
     font-size: 13px;
     color: var(--text-secondary);
     margin-bottom: 28px;
     line-height: 1.6;
   }
-
+ 
   /* Footer / Navigation */
   .wizard-footer {
     border-top: 1px solid var(--border);
@@ -217,13 +217,13 @@
     gap: 8px;
     flex-shrink: 0;
   }
-
+ 
   .footer-right {
     margin-left: auto;
     display: flex;
     gap: 8px;
   }
-
+ 
   /* Buttons */
   .btn {
     padding: 6px 16px;
@@ -239,21 +239,21 @@
     font-weight: 400;
     white-space: nowrap;
   }
-
+ 
   .btn-primary {
     background: var(--accent-blue);
     color: #fff;
     border-color: var(--accent-blue);
   }
   .btn-primary:hover { background: var(--accent-blue-hover); border-color: var(--accent-blue-hover); }
-
+ 
   .btn-secondary {
     background: transparent;
     color: var(--text-primary);
     border-color: var(--border-light);
   }
   .btn-secondary:hover { background: var(--bg-hover); }
-
+ 
   .btn-ghost {
     background: transparent;
     color: var(--link);
@@ -261,19 +261,19 @@
     padding: 6px 8px;
   }
   .btn-ghost:hover { background: var(--bg-hover); }
-
+ 
   .btn-outline-blue {
     background: transparent;
     color: var(--accent-blue);
     border-color: var(--accent-blue);
   }
   .btn-outline-blue:hover { background: rgba(0,120,212,0.1); }
-
+ 
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
+ 
   /* Radio */
   .radio-group { display: flex; flex-direction: column; gap: 0; }
-
+ 
   .radio-option {
     display: flex;
     align-items: flex-start;
@@ -286,7 +286,7 @@
   }
   .radio-option:hover { background: var(--bg-hover); }
   .radio-option.selected { border-color: var(--accent-blue); background: rgba(0,120,212,0.08); }
-
+ 
   .radio-option input[type=radio] {
     -webkit-appearance: none;
     appearance: none;
@@ -314,11 +314,11 @@
     background: var(--accent-blue);
     border-radius: 50%;
   }
-
+ 
   .radio-content { flex: 1; }
   .radio-title { font-size: 14px; color: var(--text-white); font-weight: 500; margin-bottom: 4px; }
   .radio-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
-
+ 
   .link-more {
     display: inline-block;
     margin-top: 6px;
@@ -330,7 +330,7 @@
     border-radius: 2px;
   }
   .link-more:hover { color: var(--link-hover); border-color: var(--link-hover); background: rgba(77,166,255,0.08); }
-
+ 
   /* Forms */
   .form-group { margin-bottom: 24px; }
   .form-label {
@@ -341,7 +341,7 @@
     font-weight: 500;
   }
   .required-mark { color: #c50f1f; margin-left: 2px; }
-
+ 
   .form-input, .form-textarea, .form-select {
     width: 100%;
     background: var(--bg-input);
@@ -359,9 +359,9 @@
     box-shadow: 0 0 0 1px var(--accent-blue);
   }
   .form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
-
+ 
   .form-textarea { resize: vertical; min-height: 100px; }
-
+ 
   .form-select {
     appearance: none;
     -webkit-appearance: none;
@@ -371,10 +371,10 @@
     padding-right: 30px;
     cursor: pointer;
   }
-
+ 
   .form-error { font-size: 12px; color: var(--danger); margin-top: 4px; }
   .char-count { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-align: right; }
-
+ 
   /* Tabs */
   .tab-bar {
     display: flex;
@@ -396,7 +396,7 @@
     border-bottom-color: var(--tab-active-border);
     font-weight: 500;
   }
-
+ 
   /* Table */
   .table-toolbar {
     display: flex;
@@ -406,7 +406,7 @@
     gap: 12px;
   }
   .table-count { font-size: 12px; color: var(--text-secondary); }
-
+ 
   .search-box {
     display: flex;
     align-items: center;
@@ -427,7 +427,7 @@
   }
   .search-box input::placeholder { color: var(--text-muted); }
   .search-icon { color: var(--text-muted); font-size: 13px; }
-
+ 
   .data-table {
     width: 100%;
     border-collapse: collapse;
@@ -446,7 +446,7 @@
   }
   .data-table th:hover { color: var(--text-primary); }
   .data-table th .sort-icon { margin-left: 4px; font-size: 10px; }
-
+ 
   .data-table td {
     padding: 10px 12px;
     border-bottom: 1px solid var(--table-border);
@@ -454,7 +454,7 @@
   }
   .data-table tr:hover td { background: var(--table-row-hover); }
   .data-table tr.selected td { background: rgba(0,120,212,0.12); }
-
+ 
   /* Checkbox */
   .cb {
     -webkit-appearance: none;
@@ -495,7 +495,7 @@
     color: #fff;
     font-weight: bold;
   }
-
+ 
   /* Status badge */
   .status-ready {
     display: inline-flex;
@@ -511,7 +511,7 @@
     background: var(--success-light);
     flex-shrink: 0;
   }
-
+ 
   .lang-badge {
     display: inline-flex;
     align-items: center;
@@ -525,7 +525,7 @@
     border-radius: 10px;
     margin-left: 4px;
   }
-
+ 
   /* Info box */
   .info-box {
     background: rgba(0,120,212,0.1);
@@ -537,7 +537,7 @@
     margin-bottom: 20px;
     line-height: 1.6;
   }
-
+ 
   /* Section heading */
   .section-heading {
     font-size: 16px;
@@ -547,7 +547,7 @@
     margin-top: 24px;
   }
   .section-heading:first-child { margin-top: 0; }
-
+ 
   /* User list item */
   .user-item {
     display: flex;
@@ -570,7 +570,7 @@
     font-weight: 600;
     flex-shrink: 0;
   }
-
+ 
   /* Add user panel */
   .add-user-bar {
     display: flex;
@@ -583,7 +583,7 @@
     color: var(--text-secondary);
     margin-left: auto;
   }
-
+ 
   /* Course list */
   .course-item {
     display: flex;
@@ -599,7 +599,7 @@
   }
   .course-item:hover { border-color: var(--border-light); background: var(--bg-hover); }
   .course-item.selected { border-color: var(--accent-blue); background: rgba(0,120,212,0.08); }
-
+ 
   /* Summary section */
   .summary-section {
     margin-bottom: 20px;
@@ -625,7 +625,7 @@
     cursor: pointer;
   }
   .summary-link:hover { text-decoration: underline; }
-
+ 
   .send-test-btn {
     display: inline-flex;
     align-items: center;
@@ -642,9 +642,9 @@
     transition: background 0.1s;
   }
   .send-test-btn:hover { background: var(--bg-hover); }
-
+ 
   .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
-
+ 
   /* Toast */
   .toast-container {
     position: fixed;
@@ -671,12 +671,12 @@
   }
   .toast.success { border-left-color: var(--success-light); }
   .toast.error { border-left-color: var(--danger); }
-
+ 
   @keyframes slideIn {
     from { transform: translateX(100%); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
   }
-
+ 
   /* Loading overlay */
   .loading-overlay {
     position: fixed;
@@ -698,7 +698,7 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-text { color: var(--text-primary); margin-top: 12px; font-size: 13px; }
   .loading-inner { text-align: center; }
-
+ 
   /* Modal */
   .modal-overlay {
     position: fixed;
@@ -729,7 +729,7 @@
   .modal-close:hover { color: var(--text-primary); }
   .modal-body { padding: 20px; }
   .modal-footer { padding: 12px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
-
+ 
   .modal-user-list { max-height: 280px; overflow-y: auto; margin-bottom: 12px; }
   .modal-user-item {
     display: flex;
@@ -741,7 +741,7 @@
   }
   .modal-user-item:hover { background: var(--bg-hover); padding-left: 4px; }
   .modal-user-item:last-child { border-bottom: none; }
-
+ 
   .success-overlay {
     position: fixed;
     inset: 0;
@@ -763,7 +763,7 @@
   .success-icon { font-size: 48px; margin-bottom: 16px; }
   .success-title { font-size: 20px; font-weight: 600; color: var(--text-white); margin-bottom: 10px; }
   .success-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6; }
-
+ 
   /* Inline checkbox row */
   .cb-row {
     display: flex;
@@ -773,7 +773,7 @@
     cursor: pointer;
   }
   .cb-label { font-size: 13px; color: var(--text-primary); cursor: pointer; }
-
+ 
   /* Notification panel */
   .notif-form {
     background: var(--bg-secondary);
@@ -782,7 +782,7 @@
     padding: 16px;
     margin-top: 16px;
   }
-
+ 
   /* Info icon */
   .info-icon {
     display: inline-flex;
@@ -799,22 +799,22 @@
     margin-left: 4px;
     vertical-align: middle;
   }
-
+ 
   .recommended-badge {
     font-size: 11px;
     color: var(--text-muted);
     margin-left: 4px;
   }
-
+ 
   /* End date display */
   .end-date-info {
     font-size: 13px;
     color: var(--accent-cyan);
     margin-top: 8px;
   }
-
+ 
   .hidden { display: none !important; }
-
+ 
   /* Toolbar icon buttons */
   .icon-btn {
     background: none;
@@ -830,7 +830,7 @@
     gap: 4px;
   }
   .icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
-
+ 
   .filter-btn {
     display: inline-flex;
     align-items: center;
@@ -845,25 +845,258 @@
     font-family: inherit;
   }
   .filter-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
-
+ 
   .toolbar-right {
     display: flex;
     align-items: center;
     gap: 8px;
     margin-left: auto;
   }
-
+ 
   /* Progress bar on stepper items for visual flair */
   .step-index {
     font-size: 10px;
     color: #fff;
     line-height: 1;
   }
+ 
+  /* ===== RWD: Mobile Header ===== */
+  .mobile-header {
+    display: none;
+    height: 48px;
+    background: #171717;
+    border-bottom: 1px solid #000;
+    align-items: center;
+    padding: 0 12px;
+    gap: 10px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .mobile-menu-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 6px;
+    line-height: 1;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .mobile-menu-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .mobile-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-white);
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .mobile-step-badge {
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    padding: 3px 8px;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+ 
+  /* ===== RWD: Sidebar Drawer overlay ===== */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 200;
+  }
+  .sidebar-overlay.open { display: block; }
+ 
+  /* ===== RWD: Mobile Progress Bar ===== */
+  .mobile-progress {
+    display: none;
+    height: 3px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+  .mobile-progress-fill {
+    height: 100%;
+    background: var(--accent-blue);
+    transition: width 0.3s ease;
+  }
+ 
+  /* ===== RWD: Table responsive wrapper ===== */
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .table-scroll .data-table {
+    min-width: 480px;
+  }
+ 
+  /* ===== RWD: Add-user-bar responsive ===== */
+  .add-user-bar-mobile-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+ 
+  /* ===== BREAKPOINT: ≤ 768px (tablet / large phone) ===== */
+  @media (max-width: 768px) {
+    html, body { height: auto; min-height: 100%; }
+ 
+    /* Hide desktop header breadcrumb, show mobile header */
+    .app-header { display: none; }
+    .mobile-header { display: flex; }
+    .mobile-progress { display: block; }
+ 
+    /* Body becomes vertical scroll, no overflow:hidden */
+    .app-body {
+      flex-direction: column;
+      height: auto;
+      min-height: calc(100vh - 51px);
+      overflow: visible;
+    }
+ 
+    /* Sidebar becomes a slide-in drawer */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -280px;
+      width: 260px;
+      height: 100%;
+      z-index: 300;
+      transition: left 0.25s ease;
+      box-shadow: none;
+      padding-top: 16px;
+    }
+    .sidebar.open {
+      left: 0;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+    }
+ 
+    /* Main fills full width */
+    .main-content {
+      width: 100%;
+      overflow: visible;
+    }
+ 
+    /* Content padding reduced */
+    .content-area {
+      padding: 20px 16px 100px 16px;
+      overflow: visible;
+      flex: none;
+    }
+ 
+    /* Page title smaller */
+    .page-title { font-size: 18px; }
+    .page-description { font-size: 12px; margin-bottom: 20px; }
+ 
+    /* Footer fixed at bottom on mobile */
+    .wizard-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 150;
+      padding: 10px 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .footer-right { gap: 6px; }
+    .btn { font-size: 12px; padding: 7px 12px; }
+ 
+    /* Radio options */
+    .radio-option { padding: 10px 12px; gap: 10px; }
+    .radio-title { font-size: 13px; }
+    .radio-desc { font-size: 12px; }
+ 
+    /* Table: horizontal scroll */
+    .data-table { min-width: 520px; }
+ 
+    /* Search box full width on mobile */
+    .table-toolbar { flex-wrap: wrap; gap: 8px; }
+    .toolbar-right { margin-left: 0; flex-wrap: wrap; gap: 6px; }
+    .search-box { flex: 1; min-width: 150px; }
+    .search-box input { width: 100%; }
+ 
+    /* Section heading */
+    .section-heading { font-size: 14px; }
+ 
+    /* Modal full-screen-ish */
+    .modal { width: 95vw; max-width: none; }
+    .modal-user-list { max-height: 220px; }
+ 
+    /* Toast */
+    .toast-container { bottom: 80px; right: 12px; left: 12px; }
+    .toast { min-width: unset; width: 100%; }
+ 
+    /* Add user bar wraps */
+    .add-user-bar { flex-wrap: wrap; }
+    .user-count-badge { margin-left: 0; }
+ 
+    /* Tabs */
+    .tab { padding: 8px 12px; font-size: 12px; }
+ 
+    /* Success modal */
+    .success-modal { padding: 28px 20px; }
+    .success-icon { font-size: 36px; }
+    .success-title { font-size: 17px; }
+  }
+ 
+  /* ===== BREAKPOINT: ≤ 480px (small phone) ===== */
+  @media (max-width: 480px) {
+    .content-area { padding: 16px 12px 100px 12px; }
+    .page-title { font-size: 16px; }
+ 
+    /* Footer stacks nav buttons left, secondary right */
+    .wizard-footer { padding: 8px 12px; }
+    .footer-right .btn { font-size: 11px; padding: 6px 10px; }
+ 
+    /* Radio compact */
+    .radio-option { padding: 8px 10px; }
+ 
+    /* Tabs scrollable */
+    .tab-bar { overflow-x: auto; white-space: nowrap; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+    .tab-bar::-webkit-scrollbar { height: 3px; }
+ 
+    /* Form inputs full width */
+    .form-input, .form-select, .form-textarea { font-size: 16px; /* prevent iOS zoom */ }
+ 
+    /* Course items */
+    .course-item { padding: 8px 10px; gap: 8px; }
+ 
+    /* Summary */
+    .summary-section { margin-bottom: 14px; }
+    .summary-label { font-size: 11px; }
+    .summary-value { font-size: 13px; }
+ 
+    /* User item */
+    .user-item { padding: 6px 8px; }
+  }
 </style>
 </head>
 <body>
-
-<!-- App Header -->
+ 
+<!-- Mobile Header (visible on ≤768px) -->
+<div class="mobile-header" id="mobile-header">
+  <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="開啟步驟選單">☰</button>
+  <div class="mobile-title" id="mobile-title">Attack Simulation Training</div>
+  <div class="mobile-step-badge" id="mobile-step-badge">1 / 10</div>
+</div>
+<!-- Mobile Progress Bar -->
+<div class="mobile-progress" id="mobile-progress">
+  <div class="mobile-progress-fill" id="mobile-progress-fill" style="width:10%"></div>
+</div>
+ 
+<!-- Sidebar Overlay (mobile backdrop) -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+ 
+<!-- App Header (desktop) -->
 <div class="app-header">
   <div class="breadcrumb">
     <span>Simulation</span>
@@ -871,17 +1104,17 @@
     <span>建立</span>
   </div>
 </div>
-
+ 
 <!-- App Body -->
 <div class="app-body">
-
+ 
   <!-- Sidebar Stepper -->
-  <nav class="sidebar">
+  <nav class="sidebar" id="sidebar">
     <ul class="stepper" id="stepper">
       <!-- Steps rendered by JS -->
     </ul>
   </nav>
-
+ 
   <!-- Main Content -->
   <main class="main-content">
     <div class="content-area" id="content-area">
@@ -897,10 +1130,10 @@
     </div>
   </main>
 </div>
-
+ 
 <!-- Toast Container -->
 <div class="toast-container" id="toast-container"></div>
-
+ 
 <!-- Loading Overlay (hidden) -->
 <div class="loading-overlay hidden" id="loading-overlay">
   <div class="loading-inner">
@@ -908,7 +1141,7 @@
     <div class="loading-text" id="loading-text">處理中...</div>
   </div>
 </div>
-
+ 
 <!-- Add User Modal -->
 <div class="modal-overlay hidden" id="add-user-modal">
   <div class="modal">
@@ -929,7 +1162,7 @@
     </div>
   </div>
 </div>
-
+ 
 <!-- Success Modal -->
 <div class="success-overlay hidden" id="success-overlay">
   <div class="success-modal">
@@ -939,7 +1172,7 @@
     <button class="btn btn-primary" onclick="resetWizard()">重新開始練習</button>
   </div>
 </div>
-
+ 
 <script>
 // ===== STATE =====
 const state = {
@@ -983,7 +1216,7 @@ const state = {
   simDays: 2,
   regionAware: false,
 };
-
+ 
 // ===== MOCK DATA =====
 const techniques = [
   { id: 'credential-harvest', label: '認證搜集', desc: '在這種技術中，惡意人士會建立一封郵件，並在郵件中包含一個 URL。當目標按下郵件中的 URL 時，他們將被帶到一個網站，而該網站通常會模仿知名服務並提示使用者輸入帳號密碼...', link: '檢視認證搜集的詳細資料' },
@@ -994,7 +1227,7 @@ const techniques = [
   { id: 'oauth-consent', label: 'OAuth 同意授權', desc: '在此類型的技術中，惡意執行者已建立 Azure 應用程式，要求目標應用程式權限授與某些目標資料，應用程式將提供...', link: '檢視 Oauth 同意授權的詳細資訊' },
   { id: 'user-guidance', label: '操作指南', desc: '在此技術類型中建立郵件，其中提供教導使用者特定動作的指示，例如如何舉報網路釣魚...', link: '查看操作指南的詳細資訊' },
 ];
-
+ 
 const globalPayloads = [
   { id: 'p1', name: 'Tesco Bank Account Verification', lang: '英文', rate: 41 },
   { id: 'p2', name: 'Missed Mobile Call', lang: '英文', rate: 21 },
@@ -1009,21 +1242,21 @@ const tenantPayloads = [
   { id: 'tp1', name: 'HR Password Reset', lang: '中文' },
   { id: 'tp2', name: 'VPN Expiry Notice', lang: '英文' },
 ];
-
+ 
 const allUsersPool = [
   { id: 'u1', name: '王小明', email: 'user01@contoso.com', type: 'user', avatar: '王' },
   { id: 'u2', name: '陳小華', email: 'user02@contoso.com', type: 'user', avatar: '陳' },
   { id: 'g1', name: 'IT Department', email: 'it-dept@contoso.com', type: 'group', avatar: 'IT' },
   { id: 'g2', name: 'Finance Department', email: 'finance@contoso.com', type: 'group', avatar: 'FD' },
 ];
-
+ 
 const courses = [
   { id: 'c1', name: 'Phishing Awareness', desc: '了解網路釣魚的識別方法' },
   { id: 'c2', name: 'Password Security', desc: '密碼安全最佳實踐' },
   { id: 'c3', name: 'Email Safety Basics', desc: '電子郵件安全基礎知識' },
   { id: 'c4', name: 'Social Engineering Fundamentals', desc: '社交工程防禦技巧' },
 ];
-
+ 
 const landingPages = [
   { id: 'lp1', name: 'Microsoft Landing Page Template 1', lang: '德文, 英文', defaultLang: '英文', status: '進備就緒', clicks: 9 },
   { id: 'lp2', name: 'Microsoft Landing Page Template 2', lang: '德文, 英文', defaultLang: '英文', status: '進備就緒', clicks: 1 },
@@ -1031,13 +1264,13 @@ const landingPages = [
   { id: 'lp4', name: 'Microsoft Landing Page Template 4', lang: '德文, 英文', defaultLang: '英文', status: '進備就緒', clicks: 0 },
   { id: 'lp5', name: 'Microsoft Landing Page Template 5', lang: '德文, 英文', defaultLang: '英文', status: '進備就緒', clicks: 2 },
 ];
-
+ 
 let payloadSearch = '';
 let landingSearch = '';
 let payloadSortCol = 'name';
 let payloadSortDir = 1;
 let modalSelectedIds = new Set();
-
+ 
 // ===== RENDER =====
 function renderStepper() {
   const el = document.getElementById('stepper');
@@ -1051,7 +1284,7 @@ function renderStepper() {
     </li>`;
   }).join('');
 }
-
+ 
 function renderNav() {
   const prev = document.getElementById('btn-prev');
   const next = document.getElementById('btn-next');
@@ -1062,10 +1295,11 @@ function renderNav() {
     next.textContent = '下一步';
   }
 }
-
+ 
 function renderStep() {
   renderStepper();
   renderNav();
+  updateMobileUI();
   const area = document.getElementById('content-area');
   const renderers = [
     renderStep1, renderStep2, renderStep3, renderStep4, renderStep5,
@@ -1074,8 +1308,10 @@ function renderStep() {
   area.innerHTML = '';
   renderers[state.currentStep]();
   area.scrollTop = 0;
+  // On mobile, scroll window to top
+  window.scrollTo(0, 0);
 }
-
+ 
 // ===== STEP 1 =====
 function renderStep1() {
   const area = document.getElementById('content-area');
@@ -1095,14 +1331,14 @@ function renderStep1() {
       `).join('')}
     </div>`;
 }
-
+ 
 function selectTechnique(id, el) {
   state.technique = id;
   document.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
   el.querySelector('input[type=radio]').checked = true;
 }
-
+ 
 // ===== STEP 2 =====
 function renderStep2() {
   const area = document.getElementById('content-area');
@@ -1120,19 +1356,19 @@ function renderStep2() {
       <div class="char-count" id="sim-desc-count">${state.simDesc.length}/500</div>
     </div>`;
 }
-
+ 
 function updateCharCount(inputId, countId, max) {
   const el = document.getElementById(inputId);
   const countEl = document.getElementById(countId);
   if (el && countEl) countEl.textContent = `${el.value.length}/${max}`;
 }
-
+ 
 // ===== STEP 3 =====
 function renderStep3() {
   const area = document.getElementById('content-area');
   const payloads = state.payloadTab === 'global' ? globalPayloads : tenantPayloads;
   const filtered = payloads.filter(p => p.name.toLowerCase().includes(payloadSearch.toLowerCase()));
-
+ 
   area.innerHTML = `
     <div class="page-title">選取裝載和登入頁面</div>
     <div class="page-description">選取此模擬技術的承載。您可以建立或收集自己的承載以新增此清單。請注意，如果您建立新承載，將會重新導向至承載建立精靈。</div>
@@ -1150,6 +1386,7 @@ function renderStep3() {
         <button class="filter-btn">🔽 篩選</button>
       </div>
     </div>
+    <div class="table-scroll">
     <table class="data-table">
       <thead>
         <tr>
@@ -1168,30 +1405,31 @@ function renderStep3() {
             ${state.payloadTab==='global'?`<td>${p.rate}</td>`:''}
           </tr>`).join('')}
       </tbody>
-    </table>`;
+    </table>
+    </div>`;
 }
-
+ 
 function switchPayloadTab(tab) {
   state.payloadTab = tab;
   state.selectedPayload = null;
   payloadSearch = '';
   renderStep();
 }
-
+ 
 function selectPayload(id, cb) {
   state.selectedPayload = cb.checked ? id : null;
   renderStep();
 }
-
+ 
 function selectPayloadRow(id) {
   state.selectedPayload = state.selectedPayload === id ? null : id;
   renderStep();
 }
-
+ 
 function toggleAllPayloads(cb) {
   // demo: just show all selected visually
 }
-
+ 
 function sortPayloads(col) {
   if (payloadSortCol === col) payloadSortDir *= -1;
   else { payloadSortCol = col; payloadSortDir = 1; }
@@ -1203,7 +1441,7 @@ function sortPayloads(col) {
   });
   renderStep();
 }
-
+ 
 // ===== STEP 4 =====
 function renderStep4() {
   const area = document.getElementById('content-area');
@@ -1244,21 +1482,21 @@ function renderStep4() {
         </div>`).join('')}</div>`
     }` : `<div style="padding:24px 0;color:var(--text-secondary);font-size:13px">所有組織使用者將成為目標。</div>`}`;
 }
-
+ 
 function setTargetMode(mode) {
   state.targetMode = mode;
   renderStep();
 }
-
+ 
 function removeTargetUser(id) {
   state.targetUsers = state.targetUsers.filter(u => u.id !== id);
   renderStep();
 }
-
+ 
 function fakeImport() {
   showToast('匯入功能為模擬示範，不執行實際操作。', 'info');
 }
-
+ 
 // ===== STEP 5 =====
 function renderStep5() {
   const area = document.getElementById('content-area');
@@ -1274,12 +1512,12 @@ function renderStep5() {
       <div style="font-size:13px;color:var(--text-muted)">0 使用者或群組</div>
     </div>`;
 }
-
+ 
 function renderStep5Expand() {
   const el = document.getElementById('exclude-expand');
   if (el) el.classList.toggle('hidden', !state.excludeUsers);
 }
-
+ 
 // ===== STEP 6 =====
 function renderStep6() {
   const area = document.getElementById('content-area');
@@ -1334,12 +1572,12 @@ function renderStep6() {
       </select>
     </div>`;
 }
-
+ 
 function setTrainingAssign(val) {
   state.trainingAssign = val;
   renderStep();
 }
-
+ 
 function toggleCourse(id) {
   if (state.selectedCourses.includes(id)) {
     state.selectedCourses = state.selectedCourses.filter(c => c !== id);
@@ -1348,7 +1586,7 @@ function toggleCourse(id) {
   }
   renderStep();
 }
-
+ 
 // ===== STEP 7 =====
 function renderStep7() {
   const area = document.getElementById('content-area');
@@ -1392,6 +1630,7 @@ function renderStep7() {
         <button class="filter-btn">🔽 篩選</button>
       </div>
     </div>
+    <div class="table-scroll">
     <table class="data-table">
       <thead>
         <tr>
@@ -1414,19 +1653,20 @@ function renderStep7() {
             <td>${p.clicks}</td>
           </tr>`).join('')}
       </tbody>
-    </table>`}`;
+    </table>
+    </div>`}`;
 }
-
+ 
 function setLandingMode(mode) {
   state.landingPageMode = mode;
   renderStep();
 }
-
+ 
 function selectLandingPage(id, cb) {
   state.selectedLandingPage = cb.checked ? id : null;
   renderStep();
 }
-
+ 
 // ===== STEP 8 =====
 const msNotifications = [
   {
@@ -1454,10 +1694,10 @@ const msNotifications = [
     defaultDelivery: '',
   },
 ];
-
+ 
 function renderStep8() {
   const area = document.getElementById('content-area');
-
+ 
   const notifTable = state.notifMode === 'microsoft' ? `
     <div class="form-group" style="margin-top:20px">
       <label class="form-label">選取預設語言 <span class="required-mark">*</span></label>
@@ -1471,6 +1711,7 @@ function renderStep8() {
       <button class="icon-btn" onclick="showToast('重新整理完成。')">🔄 重新整理</button>
       <span style="float:right;font-size:12px;color:var(--text-secondary);line-height:28px">3 個項目</span>
     </div>
+    <div class="table-scroll">
     <table class="data-table" style="table-layout:fixed">
       <colgroup>
         <col style="width:38%">
@@ -1515,8 +1756,9 @@ function renderStep8() {
             </td>
           </tr>`).join('')}
       </tbody>
-    </table>` : '';
-
+    </table>
+    </div>` : '';
+ 
   const customForm = state.notifMode === 'custom' ? `
     <div class="notif-form">
       <div class="form-group">
@@ -1529,11 +1771,11 @@ function renderStep8() {
       </div>
       <button class="btn btn-outline-blue" onclick="showToast('預覽功能為模擬示範。')">預覽</button>
     </div>` : '';
-
+ 
   area.innerHTML = `
     <div class="page-title">選取使用者通知</div>
     <div class="page-description">選取此行銷活動的使用者通知喜好設定。</div>
-
+ 
     <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:16px">
       <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:6px 0" onclick="setNotifMode('none')">
         <input type="radio" name="notifMode" ${state.notifMode==='none'?'checked':''} style="width:16px;height:16px;accent-color:var(--accent-blue);cursor:pointer">
@@ -1548,16 +1790,16 @@ function renderStep8() {
         <span style="font-size:13px;color:var(--text-primary)">自訂的使用者通知 <span class="info-icon">i</span></span>
       </label>
     </div>
-
+ 
     ${notifTable}
     ${customForm}`;
 }
-
+ 
 function setNotifMode(mode) {
   state.notifMode = mode;
   renderStep();
 }
-
+ 
 // ===== STEP 9 =====
 function renderStep9() {
   const area = document.getElementById('content-area');
@@ -1583,28 +1825,28 @@ function renderStep9() {
       <span class="cb-label">啟用地區感知時區傳遞</span>
     </label>`;
 }
-
+ 
 function setLaunchMode(mode) {
   state.launchMode = mode;
   renderStep();
 }
-
+ 
 function updateEndDate() {
   const el = document.getElementById('end-date-info');
   if (el) el.textContent = `您的模擬將於 ${getEndDate(state.simDays)} 結束`;
 }
-
+ 
 function getEndDate(days) {
   const d = new Date();
   d.setDate(d.getDate() + (parseInt(days) || 2));
   return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
 }
-
+ 
 function getToday() {
   const d = new Date();
   return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
 }
-
+ 
 function getTodayTime() {
   const d = new Date();
   const h = d.getHours();
@@ -1614,7 +1856,7 @@ function getTodayTime() {
   const h12 = h % 12 || 12;
   return `${ampm}${h12}:${m}:${s}`;
 }
-
+ 
 // ===== STEP 10 =====
 function renderStep10() {
   const area = document.getElementById('content-area');
@@ -1624,7 +1866,7 @@ function renderStep10() {
   const today = getToday();
   const todayTime = getTodayTime();
   const endDate = getEndDate(state.simDays);
-
+ 
   area.innerHTML = `
     <div class="page-title">檢閱模擬</div>
     <div class="page-description">啟動之前，請先檢閱您的模擬資訊。您目前已安排在 ${today} 的 ${todayTime} 啟動。其會於 ${endDate} 的 ${todayTime} 結束。</div>
@@ -1669,23 +1911,23 @@ function renderStep10() {
       </div>
     </div>`;
 }
-
+ 
 function goToStep(i) {
   state.currentStep = i;
   renderStep();
 }
-
+ 
 // ===== MODAL =====
 function openAddUserModal() {
   modalSelectedIds = new Set();
   renderModalUsers('');
   document.getElementById('add-user-modal').classList.remove('hidden');
 }
-
+ 
 function closeAddUserModal() {
   document.getElementById('add-user-modal').classList.add('hidden');
 }
-
+ 
 function renderModalUsers(query) {
   const list = document.getElementById('modal-user-list');
   const filtered = allUsersPool.filter(u =>
@@ -1706,19 +1948,19 @@ function renderModalUsers(query) {
       </div>
     </div>`).join('');
 }
-
+ 
 function toggleModalUser(id, el) {
   if (modalSelectedIds.has(id)) modalSelectedIds.delete(id);
   else modalSelectedIds.add(id);
   const cb = document.getElementById('mcb-' + id);
   if (cb) cb.checked = modalSelectedIds.has(id);
 }
-
+ 
 function filterModalUsers() {
   const q = document.getElementById('modal-search').value;
   renderModalUsers(q);
 }
-
+ 
 function confirmAddUsers() {
   modalSelectedIds.forEach(id => {
     if (!state.targetUsers.find(u => u.id === id)) {
@@ -1730,7 +1972,7 @@ function confirmAddUsers() {
   showToast(`已新增 ${modalSelectedIds.size} 位使用者或群組`, 'success');
   renderStep();
 }
-
+ 
 // ===== NAVIGATION =====
 function nextStep() {
   if (state.currentStep === state.steps.length - 1) {
@@ -1741,14 +1983,14 @@ function nextStep() {
   state.currentStep++;
   renderStep();
 }
-
+ 
 function prevStep() {
   if (state.currentStep > 0) {
     state.currentStep--;
     renderStep();
   }
 }
-
+ 
 function validateStep() {
   if (state.currentStep === 1) {
     const name = document.getElementById('sim-name');
@@ -1764,7 +2006,7 @@ function validateStep() {
   }
   return true;
 }
-
+ 
 // ===== CREATE SIMULATION =====
 function createSimulation() {
   showLoading('正在建立模擬...');
@@ -1773,7 +2015,7 @@ function createSimulation() {
     document.getElementById('success-overlay').classList.remove('hidden');
   }, 2200);
 }
-
+ 
 function sendTestEmail() {
   showLoading('傳送測試中...');
   setTimeout(() => {
@@ -1781,17 +2023,17 @@ function sendTestEmail() {
     showToast('測試郵件已傳送（模擬示範）', 'success');
   }, 1400);
 }
-
+ 
 function saveAndClose() {
   showToast('草稿已儲存（模擬示範）', 'info');
 }
-
+ 
 function cancelWizard() {
   if (confirm('確定要取消？您的進度將不會儲存。')) {
     resetWizard();
   }
 }
-
+ 
 function resetWizard() {
   document.getElementById('success-overlay').classList.add('hidden');
   Object.assign(state, {
@@ -1806,7 +2048,7 @@ function resetWizard() {
   payloadSearch = ''; landingSearch = '';
   renderStep();
 }
-
+ 
 // ===== UTILS =====
 function showLoading(text='處理中...') {
   document.getElementById('loading-text').textContent = text;
@@ -1815,7 +2057,7 @@ function showLoading(text='處理中...') {
 function hideLoading() {
   document.getElementById('loading-overlay').classList.add('hidden');
 }
-
+ 
 function showToast(msg, type='info') {
   const c = document.getElementById('toast-container');
   const t = document.createElement('div');
@@ -1825,13 +2067,51 @@ function showToast(msg, type='info') {
   c.appendChild(t);
   setTimeout(() => t.remove(), 3500);
 }
-
+ 
 function escHtml(str) {
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
+ 
 // ===== INIT =====
 renderStep();
+ 
+// ===== MOBILE SIDEBAR =====
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+  document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+}
+ 
+function closeSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.remove('open');
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+ 
+function updateMobileUI() {
+  // Update mobile step badge
+  const badge = document.getElementById('mobile-step-badge');
+  if (badge) badge.textContent = `${state.currentStep + 1} / ${state.steps.length}`;
+ 
+  // Update mobile title
+  const title = document.getElementById('mobile-title');
+  if (title) title.textContent = state.steps[state.currentStep];
+ 
+  // Update progress bar
+  const fill = document.getElementById('mobile-progress-fill');
+  if (fill) {
+    const pct = Math.round(((state.currentStep + 1) / state.steps.length) * 100);
+    fill.style.width = pct + '%';
+  }
+ 
+  // Close sidebar when step changes on mobile
+  closeSidebar();
+}
 </script>
 </body>
 </html>
+ 
